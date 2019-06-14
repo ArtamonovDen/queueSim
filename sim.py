@@ -106,6 +106,7 @@ def simulate(_lambda, _mu, _alpha, until = 50):
                 'depart_log' : depart_log,
                 'served_num' : counter_served,
                 'arrived_num' :  counter_arrive,
+                'bulk_num' :  counter_balk,
                 'mean_wait_time' : sum(collect_wait_time ) / len(collect_wait_time),
                 'mean_serv_time' : sum(collect_serv_time ) / len(collect_serv_time),
                 'mean_arrive_time' : sum(collect_arrival_time ) / len(collect_arrival_time)
