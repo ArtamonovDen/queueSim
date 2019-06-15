@@ -1,3 +1,7 @@
+'''
+        Queue Simulation script
+'''
+
 import simpy
 import random
 import pandas as pd
@@ -47,9 +51,7 @@ def customer(env, _mu, _alpha, name):
                 collect_serv_time, collect_arrival_time, collect_wait_time
         
         arrive = env.now
-         # вести лог чуваков в датафрейме
         if random.random() > _alpha:
-                #print('%7.4f %s: Here I balked' % (arrive, name))
                 counter_balk +=1
                 return
         else:   
@@ -57,25 +59,21 @@ def customer(env, _mu, _alpha, name):
                 counter_in_system +=1
                 state_log = state_log.append( {'time' : env.now , 'state_num': counter_in_system}, ignore_index=True )
                 arrive_log = arrive_log.append({'time' : env.now , 'state_num': counter_arrive}, ignore_index=True)
-                #print('%7.4f %s: Here I arrived' % (arrive, name) )   
 
         with serv.request() as req:
 
                 yield req #wait 
                 wait = env.now - arrive
                 collect_wait_time.append(wait)
-                #print('%7.4f: %s Waited for %6.3f. Start service' % (env.now,name, wait))        
                 serve_time = random.expovariate(_mu)
-                collect_serv_time.append(serve_time)
-                #print('%7.4f: %s Service time is %6.3f. Start service' % (env.now,name, serve_time))        
-                #serve_time = 30
+                collect_serv_time.append(serve_time)         
                 yield env.timeout(serve_time)
 
                 counter_served += 1
                 counter_in_system -= 1
                 state_log = state_log.append( {'time' : env.now , 'state_num': counter_in_system}, ignore_index=True )
                 depart_log = depart_log.append({'time' : env.now , 'state_num': counter_served}, ignore_index=True)
-                #print('%7.4f %s: Finished' % (env.now, name))
+                
 
 
 
@@ -96,7 +94,6 @@ def simulate(_lambda, _mu, _alpha, until = 50):
         state_log = pd.DataFrame(columns=c)
         arrive_log = pd.DataFrame(columns=c)
         depart_log = pd.DataFrame(columns=c)
-        #print(until,customers)
 
         run(_lambda, _mu, _alpha, until)
 
@@ -112,13 +109,12 @@ def simulate(_lambda, _mu, _alpha, until = 50):
                 'mean_arrive_time' : sum(collect_arrival_time ) / len(collect_arrival_time)
         }
 
-        print("Counter away {}".format(counter_balk))
-        print("Counter arrive {}".format(counter_arrive))
-        print("Counter counter_served {}".format(counter_served))
-        print("Counter counter_in_system {}".format(counter_in_system))
-        print('Serve mean time is {}'.format(sum(collect_serv_time ) /len(collect_serv_time)))
-        print('Arrive mean time is {}'.format(sum(collect_arrival_time) / len(collect_arrival_time)))
-        print('Wait mean time is {}'.format(sum(collect_wait_time) / len(collect_wait_time)))
+        print("Количество отвергнутых требований: {}".format(counter_balk))
+        print("Количество прибывших требований: {}".format(counter_arrive))
+        print("Количество покинувших требований: {}".format(counter_served))
+        print('Среднее время обслуживания: %7.4f'% (sum(collect_serv_time ) /len(collect_serv_time)))
+        print('Среднее время прибытия: %7.4f'%( sum(collect_arrival_time) / len(collect_arrival_time)))
+        print('Среднее время ожидания: %7.4f'%(sum(collect_wait_time) / len(collect_wait_time)))
         return stat
 
 
